@@ -1,7 +1,6 @@
 package edu.northeastern.ds4300.twitter;
 
 import java.util.*;
-import java.lang.String.*;
 import redis.clients.jedis.*;
 
 public class RedisTwitterAPI implements TwitterAPI {
@@ -29,6 +28,11 @@ public class RedisTwitterAPI implements TwitterAPI {
         jedis.set(key,value);
     }
 
+    public void addFollower(String userID, String followerID) {
+        String key = "follows:"+followerID;
+        jedis.sadd(key, userID);
+    }
+
     public void addFollows(String userID, String followsID)
     {
         String key = "follows:"+userID;
@@ -45,8 +49,8 @@ public class RedisTwitterAPI implements TwitterAPI {
 
         List<String> follows = jedis.lrange("follows:" + userID, 0, -1);
         for (String id : follows) {
-           List<String> tweetKeys = jedis.keys("tweets:"+id+":*");
-           for (Sting tweetKey : tweetKeys) {
+           List<String> tweetKeys = new ArrayList<String>(jedis.keys("tweets:"+id+":*"));
+           for (String tweetKey : tweetKeys) {
                int lastColon = tweetKey.lastIndexOf(':');
                String tweetID = tweetKey.substring(lastColon);
                // Compare tweet ID against elements of the sorted array list
@@ -56,11 +60,13 @@ public class RedisTwitterAPI implements TwitterAPI {
            }
         }
         for (String tweetID : recentTweetIDs) {
-            String tweetKey = jedis.keys("tweets:*:"+tweetID)[0];
+            List<String> tweetKeyArray = new ArrayList<String>(jedis.keys("tweets:*:"+tweetID));
+            String tweetKey = tweetKeyArray.get(0);
             String tweetUserID = tweetKey.substring(tweetKey.indexOf(':'), tweetKey.lastIndexOf(':'));
             String jedisContent = jedis.get(tweetKey);
-            //TODO: Date tweetDate = (some proccessing of jedis content)
-            // TODO: String content = (some processing of jedis content)
+            String dateString = jedisContent.substring(0, jedisContent.indexOf(':'));
+            Date tweetDate = new Date(Long.parseLong(dateString));
+            String tweetContent = jedisContent.substring(jedisContent.indexOf(':'));
             Tweet toAdd = new Tweet(tweetUserID, tweetDate, tweetContent);
             toReturn.add(toAdd);
         }
