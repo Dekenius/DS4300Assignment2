@@ -7,30 +7,61 @@ public class TwitterTester {
 
     private static TwitterAPI api = new RedisTwitterAPI();
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         api.reset();
-        api.addFollower("5", "6");
-        api.addFollower("5", "7");
-        api.addFollower("5", "8");
-        api.addFollower("5", "9");
-        api.addFollower("5", "10");
-        api.addFollower("5", "11");
-        api.addFollower("5", "12");
-        api.addFollower("5", "13");
-        api.addFollower("5", "14");
-        api.addFollower("5", "15");
+
+        BufferedReader csvReader = new BufferedReader(new FileReader("new.csv"));
+
+        while((row = csvReader.readLine()) != null) {
+            String[] data = row.split(",");
+            api.addFollower(data[0], data[1]);
+        }
+
+        csvReader.close();
 
 
+        tweetTest();
+        timelineTest();
+
+
+
+
+
+    }
+
+    private static void tweetTest() throws IOException, SQLException {
+        BufferedReader csvReader2 = new BufferedReader(new FileReader("new2.csv"));
+
+        System.out.println("Starting tweet test.");
         long start = System.currentTimeMillis();
-        for (int i=0; i<10; i++) {
-            if (i % 10000 == 0) System.out.println(i);
-            Tweet t = new Tweet("5", new Date(), "NoSQL is fun");
+
+        while((row = csvReader2.readLine()) != null) {
+            String[] data = row.split(",");
+            Tweet t = new Tweet(Integer.parseInt(data[1]), data[2], data[3]);
             api.postTweet(t, true);
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Seconds: "+(end-start)/1000.0);
 
+
+        long end = System.currentTimeMillis();
+        System.out.println("Seconds taken to post: "+(end-start)/1000.0);
+
+        csvReader2.close();
+    }
+
+    private static void timelineTest() {
+
+        // Start a timer
+        System.out.println("Starting timeline test.");
+        Instant start = Instant.now();
+
+        // Pick random user's timeline
+        for (int i = 0; i < 1000; ++i) {
+            api.getTimeline((int)(Math.random() * 1000));
+        }
+
+        // Print a "done" message / close timer
+        Instant end = Instant.now();
+        System.out.println("Finished timeline test. Duration: " + Duration.between(start, end));
     }
 
 }
