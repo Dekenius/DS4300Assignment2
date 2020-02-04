@@ -1,7 +1,6 @@
 package edu.northeastern.ds4300.twitter;
 
 import java.util.Date;
-import redis.clients.jedis.*;
 
 public class TwitterTester {
 
@@ -21,7 +20,6 @@ public class TwitterTester {
 
         tweetTest();
         timelineTest();
-
     }
 
     private static void tweetTest() throws IOException, SQLException {

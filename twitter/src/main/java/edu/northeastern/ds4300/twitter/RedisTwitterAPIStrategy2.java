@@ -63,10 +63,11 @@ public class RedisTwitterAPI implements TwitterAPI {
             String creator_userID = m.group(1);
 
             int i = tweet_value.indexOf(':');
-            Date tweet_date = new Date(Long.parseLong(tweet_value.substring(0,i)) * 1000);
+            Date tweet_date = new Date(Long.parseLong(tweet_value.substring(0, i)) * 1000);
 
             Tweet timeline_tweet = new Tweet(creator_userID, tweet_date, tweet_value.substring(i));
             tweet_list.add(timeline_tweet);
+        }
 
         return tweet_list;
     }
@@ -75,6 +76,4 @@ public class RedisTwitterAPI implements TwitterAPI {
 
         return jedis.smembers("followers:"+userID);
     }
-
-
 }
