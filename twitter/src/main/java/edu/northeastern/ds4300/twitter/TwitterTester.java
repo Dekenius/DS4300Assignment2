@@ -19,11 +19,8 @@ public class TwitterTester {
 
         csvReader.close();
 
-
         tweetTest();
         timelineTest();
-
-
 
     }
 
