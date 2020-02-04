@@ -25,8 +25,6 @@ public class TwitterTester {
 
 
 
-
-
     }
 
     private static void tweetTest() throws IOException, SQLException {
