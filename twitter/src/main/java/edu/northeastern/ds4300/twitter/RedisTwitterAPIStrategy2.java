@@ -14,10 +14,9 @@ public class RedisTwitterAPI implements TwitterAPI {
     }
 
 
-    public long getNextID()
+    private long getNextID()
     {
-        long next = jedis.incr("nextTweetID");
-        return next;
+      return jedis.incr("nextTweetID");
     }
 
 
@@ -36,8 +35,8 @@ public class RedisTwitterAPI implements TwitterAPI {
         }
     }
 
-    //recives tweet_key and the followers user_id
-    public void addToTimeline(String tweet_key, String userID)
+    //receives tweet_key and the followers user_id
+    private void addToTimeline(String tweet_key, String userID)
     {
         String timeline_key = "timeline:"+userID;
         jedis.lpush(timeline_key, tweet_key);
@@ -60,14 +59,21 @@ public class RedisTwitterAPI implements TwitterAPI {
             //some redex to extract the user_id from the tweet key
             Pattern p = Pattern.compile(" (?<=:)(?<x>.*?)(?=:) ");
             Matcher m = p.matcher(tweet_value);
-            String creator_userID = m.group(1);
+
+            MatchResult result = m.toMatchResult();
+
+            String creator_userID = result.toString();
+            System.out.println("1 " + creator_userID);
 
             int i = tweet_value.indexOf(':');
             Date tweet_date = new Date(Long.parseLong(tweet_value.substring(0, i)) * 1000);
+            System.out.println("2 " + tweet_date);
+            System.out.println("3 " + tweet_value.substring(i));
 
             Tweet timeline_tweet = new Tweet(creator_userID, tweet_date, tweet_value.substring(i));
             tweet_list.add(timeline_tweet);
         }
+
 
         return tweet_list;
     }
