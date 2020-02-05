@@ -56,21 +56,22 @@ public class RedisTwitterAPI implements TwitterAPI {
         for (String tweet_key : jedis.lrange("timeline:"+userID, 0, 19))
             String tweet_value = jedis.get(tweet_key);
 
-            //some redex to extract the user_id from the tweet key
-            Pattern p = Pattern.compile(" (?<=:)(?<x>.*?)(?=:) ");
+            //some regex to extract the user_id from the tweet key
+            Pattern p = Pattern.compile("(?<=:)(?<x>.*?)(?=:)");
             Matcher m = p.matcher(tweet_value);
-
-            MatchResult result = m.toMatchResult();
-
-            String creator_userID = result.toString();
-            System.out.println("1 " + creator_userID);
+            String creator_userID = null;
+            while (m.find()) {
+             // Get the group matched using group() method
+             System.out.println("1" + m.group(0));
+             creator_userID = m.group(0);
+           }
 
             int i = tweet_value.indexOf(':');
-            Date tweet_date = new Date(Long.parseLong(tweet_value.substring(0, i)) * 1000);
+            Date tweet_date = new Date(Long.parseLong(tweet_value.substring(0, i)));
             System.out.println("2 " + tweet_date);
             System.out.println("3 " + tweet_value.substring(i));
 
-            Tweet timeline_tweet = new Tweet(creator_userID, tweet_date, tweet_value.substring(i));
+            Tweet timeline_tweet = new Tweet(creator_userID, tweet_date, tweet_value.substring(i+1));
             tweet_list.add(timeline_tweet);
         }
 
