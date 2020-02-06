@@ -6,7 +6,7 @@ import redis.clients.jedis.*;
 public class RedisTwitterAPI implements TwitterAPI {
 
 
-    Jedis jedis = new Jedis("localhost");
+    private Jedis jedis = new Jedis("localhost");
 
 
     public void reset() {
@@ -55,10 +55,11 @@ public class RedisTwitterAPI implements TwitterAPI {
 
         for (String tweet_key : jedis.lrange("timeline:"+userID, 0, 19))
             String tweet_value = jedis.get(tweet_key);
+            System.out.println("100" + tweet_key);
 
             //some regex to extract the user_id from the tweet key
             Pattern p = Pattern.compile("(?<=:)(?<x>.*?)(?=:)");
-            Matcher m = p.matcher(tweet_value);
+            Matcher m = p.matcher(tweet_key);
             String creator_userID = null;
             while (m.find()) {
              // Get the group matched using group() method
