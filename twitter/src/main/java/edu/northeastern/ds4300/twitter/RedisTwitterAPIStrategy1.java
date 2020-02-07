@@ -41,41 +41,45 @@ public class RedisTwitterAPI implements TwitterAPI {
     public List<Tweet> getTimeline(String userID) {
         // Create tweet ID holder
         List<Tweet> toReturn = new ArrayList<>();
-        ArrayList<String> recentTweetIDs = new ArrayList<>(
-            Arrays.asList("-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1")
-        );
+        ArrayList<String> recentTweetIDs = new ArrayList<>();
 
         Set<String> follows = jedis.smembers("follows:" + userID);
+
         for (String id : follows) {
+
             List<String> tweetKeys = new ArrayList<>(jedis.keys("tweets:" + id + ":*"));
 
             for (String tweetKey : tweetKeys) {
                 int lastColon = tweetKey.lastIndexOf(':');
-                String tweetID = tweetKey.substring(lastColon);
+                String tweetID = tweetKey.substring(lastColon+1);
                 // Compare tweet ID against elements of the sorted array list
                 recentTweetIDs.add(tweetID);
-                Collections.sort(recentTweetIDs);
-                recentTweetIDs.remove(20);
-                System.out.println(recentTweetIDs);
+                Collections.sort(recentTweetIDs, Collections.reverseOrder());
+                if (recentTweetIDs.size() > 20) {
+                    recentTweetIDs.subList(20, recentTweetIDs.size()).clear();
+                }
             }
+        }
 
-        }
-        for (String tweetID : recentTweetIDs) {
-            if(tweetID.equals("-1")) {
-                continue;
+        try {
+            for (String tweetID : recentTweetIDs) {
+                if(tweetID.equals("-1")) {
+                    continue;
+                }
+                List<String> tweetKeyArray = new ArrayList<>(jedis.keys("tweets:*:" + tweetID));
+                String tweetKey = tweetKeyArray.get(0);
+                String tweetUserID = tweetKey.substring(tweetKey.indexOf(':')+1, tweetKey.lastIndexOf(':'));
+                String jedisContent = jedis.get(tweetKey);
+                String dateString = jedisContent.substring(0, jedisContent.indexOf(':'));
+                Date tweetDate = new Date(Long.parseLong(dateString));
+                String tweetContent = jedisContent.substring(jedisContent.indexOf(':')+1);
+                Tweet toAdd = new Tweet(tweetUserID, tweetDate, tweetContent);
+                toReturn.add(toAdd);
             }
-            List<String> tweetKeyArray = new ArrayList<>(jedis.keys("tweets:*:" + tweetID));
-            String tweetKey = tweetKeyArray.get(0);
-            String tweetUserID = tweetKey.substring(tweetKey.indexOf(':'), tweetKey.lastIndexOf(':'));
-            String jedisContent = jedis.get(tweetKey);
-            String dateString = jedisContent.substring(0, jedisContent.indexOf(':'));
-            Date tweetDate = new Date(Long.parseLong(dateString));
-            String tweetContent = jedisContent.substring(jedisContent.indexOf(':'));
-            Tweet toAdd = new Tweet(tweetUserID, tweetDate, tweetContent);
-            toReturn.add(toAdd);
+        } catch (redis.clients.jedis.exceptions.JedisConnectionException e) {
+            e.printStackTrace();
         }
-        System.out.println(toReturn);
+
         return toReturn;
     }
 
