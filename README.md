@@ -6,10 +6,11 @@ Dan Krasnonosenkikh: Strategy 1
 
 Matthew Wojtowicz: Strategy 2
 
-## Assumptions: 
-* We changed our follows/follower generator to create about 5 followers per user as compared to ours for assignment 1 which only had a bout 1 follower per user. This allows any given timeline to contain multiple user's tweets which helps to better reflect the actual usage and performance of getTimeline.
+## Adustments: 
+We changed our follows/follower generator to create about 5 followers per user as compared to ours for assignment 1 which only had about 1 follower per user. This allows any given timeline to contain multiple user's tweets which helps to better reflect the actual usage and performance of getTimeline.
 
-
+## Methods
+We implemented two different strategies. For the first strategy, whenever a tweet is posted it is simply added to the key-value table for the user's tweets. Whenever a timeline is requested, that user's timeline is generated in real time by accessing their follower's tweets and returning the 20 most recent ones. For the second strategy, whenever a tweet is posted it is added to the key-value pair for the user's tweet as well as added to the timeline of anyone who follows that user. Whenever a timeline is requested, this allows for the 20 most recent tweets in a user's timeline to be quickly fetched. 
 
 ## Results
 
